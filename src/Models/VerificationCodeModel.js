@@ -1,7 +1,7 @@
 const { model, Schema } = require('mongoose');
 const cron = require('node-cron');
 const verificationModel = new Schema({
-    email: {
+    phone: {
         type: String,
         required: false
     },
