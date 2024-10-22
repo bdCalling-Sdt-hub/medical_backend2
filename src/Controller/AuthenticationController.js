@@ -186,10 +186,10 @@ const SignUp = async (req, res) => {
 // login 
 const SignIn = async (req, res) => {
     try {
-        const { email, password } = req.body
+        const { phone, password } = req.body
         const [user, doctor] = await Promise.all([
-            User.findOne({ email: email }),
-            Doctor.findOne({ email: email })
+            User.findOne({ phone: phone }),
+            Doctor.findOne({ phone: phone })
         ])
         if (user && user?.block) {
             return res.status(400).send({ success: false, message: "your account has been blocked" });
@@ -546,6 +546,7 @@ const SendVerifyEmail = async (req, res) => {
 //verify code
 const VerifyCode = async (req, res) => {
     const { code, phone } = req.body;
+    console.log(req.body)
     try {
         const [verify, user, doctor] = await Promise.all([
             Verification.findOne({ phone: phone, code: code }),
@@ -586,8 +587,8 @@ const VerifyCode = async (req, res) => {
                 id: user?._id || doctor?._id
             }
             const token = await jwt.sign(userData, ACCESS_TOKEN_SECRET, { expiresIn: 3600000000 });
-            const accessToken = await jwt.sign({ code, email }, ACCESS_TOKEN_SECRET, { expiresIn: 600 });
-            Verification.deleteOne({ email: email, code: code })
+            const accessToken = await jwt.sign({ code, phone }, ACCESS_TOKEN_SECRET, { expiresIn: 600 });
+            Verification.deleteOne({ phone: phone, code: code })
             res.status(200).send({ success: true, accessToken, token, message: `${type || 'user'} verified successfully` })
         } else {
             res.status(404).send({ success: false, message: "verification code doesn't match" });
@@ -601,7 +602,7 @@ const VerifyCode = async (req, res) => {
 const ResetPassword = async (req, res) => {
     try {
         const requestedUser = req?.user
-        const verify = await Verification.findOne({ email: requestedUser?.email, code: requestedUser?.code })
+        const verify = await Verification.findOne({ phone: requestedUser?.phone, code: requestedUser?.code })
         if (verify?._id) {
             const { password, confirm_password, type } = req.body
             if (password !== confirm_password) {
@@ -610,12 +611,12 @@ const ResetPassword = async (req, res) => {
             const hash_pass = await HashPassword(password)
             //console.log(hash_pass)
             await Promise.all([
-                Doctor.updateOne({ email: verify?.email }, {
+                Doctor.updateOne({ phone: verify?.phone }, {
                     $set: {
                         password: hash_pass
                     }
                 }),
-                User.updateOne({ email: verify?.email }, {
+                User.updateOne({ phone: verify?.phone }, {
                     $set: {
                         password: hash_pass
                     }
@@ -658,7 +659,7 @@ const ResetPassword = async (req, res) => {
             //     `,
             // });
 
-            await Verification.deleteOne({ email: requestedUser?.email, code: requestedUser?.code })
+            await Verification.deleteOne({ phone: requestedUser?.phone, code: requestedUser?.code })
             return res.status(200).send({ success: true, message: 'password updated successfully' });
         } else {
             res.status(401).send({ success: false, message: "verification code doesn't match" });
@@ -722,10 +723,10 @@ const createDoctor = async (req, res) => {
                         phone: existingDoctor?.phone,
                         code: activationCode
                     })
-                    // const msgResult = await sendMessage(`your verification code is ${code?.code}`, existingDoctor?.phone)
-                    // if (msgResult?.invalid) {
-                    //     return res.status(400).send({ success: false, message: `${existingDoctor?.phone} is not a valid number or missing country code` })
-                    // }
+                    const msgResult = await sendMessage(`your verification code is ${code?.code}`, existingDoctor?.phone)
+                    if (msgResult?.invalid) {
+                        return res.status(400).send({ success: false, message: `${existingDoctor?.phone} is not a valid number or missing country code` })
+                    }
                     await code.save();
                     // SendEmail({
                     //     sender: 'Medical',
