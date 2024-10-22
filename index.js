@@ -41,22 +41,6 @@ app.use('/payment', PaymentRoutes)
 app.use('/overview', OverViewRoutes)
 app.use('/call', callHistoryRoutes)
 app.use('/fcm', FCMtokenRoutes)
-// app.get('/test', async (req, res) => {
-//   const ip = req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || req.headers['cf-connecting-ip'] || req.socket.remoteAddress;
-
-//   return res.send({
-//     test: {
-//       ip,  // This will give either the forwarded IP or the remote IP
-//     },
-//   });
-// });
-
-
-// create mail token 
-
-
-
-//create mail token
 
 
 app.get("/", (req, res) => {

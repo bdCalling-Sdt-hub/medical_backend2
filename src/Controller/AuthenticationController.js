@@ -43,7 +43,7 @@ const SignUp = async (req, res) => {
                 code: activationCode
             })
             await code.save();
-            const result = await sendMessage(`your verification code is ${activationCode}`, existingUsers?.phone)
+            const result = await sendMessage(`your verification code is ${code?.code}`, existingUsers?.phone)
             if (result?.invalid) {
                 return res.status(400).send({ success: false, message: `${existingUsers?.phone} is not a valid number or missing country code` })
             }
@@ -115,7 +115,7 @@ const SignUp = async (req, res) => {
                 code: activationCode
             })
             await code.save();
-            const result = await sendMessage(`your verification code is ${activationCode}`, newUser?.phone)
+            const result = await sendMessage(`your verification code is ${code?.code}`, newUser?.phone)
             if (result?.invalid) {
                 return res.status(400).send({ success: false, message: `${newUser?.phone} is not a valid number or missing country code` })
             }
@@ -490,7 +490,7 @@ const SendVerifyEmail = async (req, res) => {
                 code: activationCode
             })
 
-            const msgResult = await sendMessage(`your verification code is ${activationCode}`, user?.phone)
+            const msgResult = await sendMessage(`your verification code is ${code?.code}`, user?.phone)
             if (msgResult?.invalid) {
                 return res.status(400).send({ success: false, message: `${existingUsers?.phone} is not a valid number or missing country code` })
             }
@@ -621,42 +621,42 @@ const ResetPassword = async (req, res) => {
                     }
                 })
             ])
-            SendEmail({
-                sender: 'Medical',
-                receiver: requestedUser?.email,
-                subject: 'Password Reset Successfully',
-                msg: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #f9f9f9;">
-                    <h2 style="color: #2c3e50; text-align: center;">Hello, ${requestedUser?.name}!</h2>
-                    
-                    <p style="color: #34495e; font-size: 16px; line-height: 1.6; text-align: center;">
-                        Your password has been successfully reset. You can now log in using your new password.
-                    </p>
-            
-                    <div style="margin: 20px 0; text-align: center;">
-                        <p style="font-size: 22px; font-weight: bold; background-color: #ecf0f1; padding: 10px 20px; border-radius: 5px; display: inline-block;">
-                            New Password: ${password}
-                        </p>
-                    </div>
-            
-                    <p style="color: #34495e; font-size: 16px; line-height: 1.6; text-align: center;">
-                        If you didn’t request this password change, please contact our support team immediately for assistance.
-                    </p>
-            
-                    <p style="color: #34495e; font-size: 16px; line-height: 1.6; text-align: center;">
-                        Thank you for using Medical!
-                    </p>
-            
-                    <footer style="margin-top: 40px; text-align: center;">
-                        <p style="color: #95a5a6; font-size: 14px;">
-                            Best regards,<br>
-                            <strong>Medical Team</strong><br>
-                            <a href="https://medicalwebsite.com" style="color: #3498db; text-decoration: none;">Visit our website</a>
-                        </p>
-                    </footer>
-                </div>
-                `,
-            });
+            // SendEmail({
+            //     sender: 'Medical',
+            //     receiver: requestedUser?.email,
+            //     subject: 'Password Reset Successfully',
+            //     msg: `
+            //     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #f9f9f9;">
+            //         <h2 style="color: #2c3e50; text-align: center;">Hello, ${requestedUser?.name}!</h2>
+
+            //         <p style="color: #34495e; font-size: 16px; line-height: 1.6; text-align: center;">
+            //             Your password has been successfully reset. You can now log in using your new password.
+            //         </p>
+
+            //         <div style="margin: 20px 0; text-align: center;">
+            //             <p style="font-size: 22px; font-weight: bold; background-color: #ecf0f1; padding: 10px 20px; border-radius: 5px; display: inline-block;">
+            //                 New Password: ${password}
+            //             </p>
+            //         </div>
+
+            //         <p style="color: #34495e; font-size: 16px; line-height: 1.6; text-align: center;">
+            //             If you didn’t request this password change, please contact our support team immediately for assistance.
+            //         </p>
+
+            //         <p style="color: #34495e; font-size: 16px; line-height: 1.6; text-align: center;">
+            //             Thank you for using Medical!
+            //         </p>
+
+            //         <footer style="margin-top: 40px; text-align: center;">
+            //             <p style="color: #95a5a6; font-size: 14px;">
+            //                 Best regards,<br>
+            //                 <strong>Medical Team</strong><br>
+            //                 <a href="https://medicalwebsite.com" style="color: #3498db; text-decoration: none;">Visit our website</a>
+            //             </p>
+            //         </footer>
+            //     </div>
+            //     `,
+            // });
 
             await Verification.deleteOne({ email: requestedUser?.email, code: requestedUser?.code })
             return res.status(200).send({ success: true, message: 'password updated successfully' });
@@ -722,10 +722,10 @@ const createDoctor = async (req, res) => {
                         email: existingDoctor?.email,
                         code: activationCode
                     })
-                    const msgResult = await sendMessage(`your verification code is ${activationCode}`, existingDoctor?.phone)
-                    if (msgResult?.invalid) {
-                        return res.status(400).send({ success: false, message: `${existingDoctor?.phone} is not a valid number or missing country code` })
-                    }
+                    // const msgResult = await sendMessage(`your verification code is ${code?.code}`, existingDoctor?.phone)
+                    // if (msgResult?.invalid) {
+                    //     return res.status(400).send({ success: false, message: `${existingDoctor?.phone} is not a valid number or missing country code` })
+                    // }
                     await code.save();
                     // SendEmail({
                     //     sender: 'Medical',
@@ -824,13 +824,13 @@ const createDoctor = async (req, res) => {
                 try {
                     const newDoctor = new Doctor(doctorData);
                     const fcmToken = new FCMtokenModel({ token: fcm, userId: newDoctor?._id })
-                  
+
                     const activationCode = Math.floor(100000 + Math.random() * 900000).toString();
                     const code = new Verification({
                         email: newDoctor?.email,
                         code: activationCode
                     })
-                    const msgResult = await sendMessage(`your verification code is ${activationCode}`, newDoctor?.phone)
+                    const msgResult = await sendMessage(`your verification code is ${code?.code}`, newDoctor?.phone)
                     if (msgResult?.invalid) {
                         return res.status(400).send({ success: false, message: `${newDoctor?.phone} is not a valid number or missing country code` })
                     }
@@ -843,29 +843,29 @@ const createDoctor = async (req, res) => {
                     //     msg: `
                     //     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #f9f9f9;">
                     //         <h2 style="color: #2c3e50; text-align: center;">Hello, Dr. ${newDoctor?.name}!</h2>
-                            
+
                     //         <p style="color: #34495e; font-size: 16px; line-height: 1.6; text-align: center;">
                     //             Congratulations! You have successfully registered on our platform.
                     //         </p>
-                    
+
                     //         <p style="color: #34495e; font-size: 16px; line-height: 1.6; text-align: center;">
                     //             Now you can explore everything our platform has to offer. To get started, please verify your email using the code below:
                     //         </p>
-                    
+
                     //         <div style="margin: 30px 0; text-align: center;">
                     //             <p style="font-size: 22px; font-weight: bold; background-color: #ecf0f1; padding: 15px 25px; border-radius: 8px; display: inline-block;">
-                    //                 ${activationCode}
+                    //                 ${code?.code}
                     //             </p>
                     //         </div>
-                    
+
                     //         <p style="color: #34495e; font-size: 16px; line-height: 1.6; text-align: center;">
                     //             If you have any questions or need assistance, feel free to contact our support team.
                     //         </p>
-                    
+
                     //         <p style="color: #34495e; font-size: 16px; line-height: 1.6; text-align: center;">
                     //             Thank you for joining Medical!
                     //         </p>
-                    
+
                     //         <footer style="margin-top: 40px; text-align: center;">
                     //             <p style="color: #95a5a6; font-size: 14px;">
                     //                 Best regards,<br>
