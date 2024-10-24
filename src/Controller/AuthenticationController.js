@@ -481,8 +481,8 @@ const SendVerifyEmail = async (req, res) => {
             } else {
                 user = doctor
             }
-            if (!user?.email) {
-                return res.status(400).send({ success: false, message: 'email not found' });
+            if (!user?.phone) {
+                return res.status(400).send({ success: false, message: 'User not found' });
             }
             const activationCode = Math.floor(100000 + Math.random() * 900000).toString();
             const code = new Verification({
@@ -536,7 +536,7 @@ const SendVerifyEmail = async (req, res) => {
             return res.status(200).send({ success: true, message: `verification code has been sent to ${user?.phone}`, });
         }
         else {
-            return res.status(400).send({ success: false, message: 'email not found' });
+            return res.status(400).send({ success: false, message: 'User not found' });
         }
     } catch (error) {
         return res.status(500).send({ success: false, message: error?.message || 'Internal server error', ...error });
@@ -546,7 +546,6 @@ const SendVerifyEmail = async (req, res) => {
 //verify code
 const VerifyCode = async (req, res) => {
     const { code, phone } = req.body;
-    console.log(req.body)
     try {
         const [verify, user, doctor] = await Promise.all([
             Verification.findOne({ phone: phone, code: code }),
@@ -709,13 +708,13 @@ const createDoctor = async (req, res) => {
             try {
                 const { available_days, available_for, services, fcm, ...otherInfo } = req.body
                 // console.log(JSON.parse(services))
-                const email = otherInfo?.email
+                const phone = otherInfo?.phone
                 const [existingDoctor, user] = await Promise.all([
-                    Doctor.findOne({ email: email, verified: false }),
-                    User.findOne({ email: email }),
+                    Doctor.findOne({ phone: phone, verified: false }),
+                    User.findOne({ phone: phone }),
                 ])
                 if (user) {
-                    return res.status(403).send({ success: false, message: "there's a user with this email  you can't create doctor with this email" })
+                    return res.status(403).send({ success: false, message: "there's a user with this phone  you can't create doctor with this phone" })
                 }
                 if (existingDoctor) {
                     const activationCode = Math.floor(100000 + Math.random() * 900000).toString();
