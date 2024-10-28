@@ -9,7 +9,7 @@ const applyMiddleware = (app) => {
     app.use(cors({
         origin: [
             LOCAL_CLIENT,
-            CLIENT, '*', 'http://103.161.9.133:3001', 'http://103.161.9.133:3002'
+            CLIENT, '*', 'http://103.161.9.133:3001', 'http://103.161.9.133:3002','http://103.161.9.133:3003'
         ],
         credentials: true,
         optionsSuccessStatus: 200

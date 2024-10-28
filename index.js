@@ -23,6 +23,9 @@ const { server, app } = require("./src/Socket");
 const callHistoryRoutes = require("./src/routes/CallHistoryRoutes");
 const checkPastPendingAppointments = require("./src/utils/ChekPastPandingAppoinment");
 const FCMtokenRoutes = require("./src/routes/FCMtokenRoutes");
+const sendMessage = require("./src/utils/SendMessage");
+// const PhoneInfo = require("./src/utils/SendMessage");
+// const test = require("./src/utils/SendMessage");
 applyMiddleware(app);
 
 //routes
@@ -42,7 +45,11 @@ app.use('/overview', OverViewRoutes)
 app.use('/call', callHistoryRoutes)
 app.use('/fcm', FCMtokenRoutes)
 
-
+app.post('/test', async (req, res) => {
+  // test(req?.body?.num)
+  const result = await sendMessage("test the api hey rebbeca don't worry its just a test message from your backend devloper", req?.body?.num)
+  return res.send(result)
+})
 app.get("/", (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -86,7 +93,23 @@ app.use(globalErrorHandler);
 
 const main = async () => {
   await connectDB()
-  server.listen(port, SERVER_IP, () => {
+  server.listen(port, () => {
+    process.on("unhandledRejection", (error) => {
+      // logger.error("Unhandled Rejection:", error);
+      // server.close(() => process.exit(1));
+    });
+
+    // handle uncaught exceptions
+    process.on("uncaughtException", (error) => {
+      // errorLogger.error("Uncaught Exception:", error);
+      // process.exit(1);
+    });
+
+    // handle termination signals
+    process.on("SIGTERM", () => {
+      // logger.info("SIGTERM received");
+      // server.close(() => process.exit(0));
+    });
     console.log(`Server is running on port ${port}`);
   });
 }

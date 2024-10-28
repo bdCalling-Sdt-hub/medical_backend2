@@ -28,10 +28,10 @@ const SignUp = async (req, res) => {
         if (confirm_password !== password) {
             return res.status(201).send({ success: false, message: "confirm password doesn't match" });
         }
-        const email = user?.email
+        const phone = user?.phone
         const [existingUsers, doctor] = await Promise.all([
-            User.findOne({ email: email, verified: false }),
-            Doctor.findOne({ email: email })
+            User.findOne({ phone: phone, verified: false }),
+            Doctor.findOne({ phone: phone })
         ])
         if (doctor) {
             return res.status(403).send({ success: false, message: "there's a doctor with this email  you can't create user with this email" })
@@ -39,7 +39,7 @@ const SignUp = async (req, res) => {
         if (existingUsers) {
             const activationCode = Math.floor(100000 + Math.random() * 900000).toString();
             const code = new Verification({
-                email: existingUsers?.email,
+                phone: existingUsers?.phone,
                 code: activationCode
             })
             await code.save();
@@ -99,9 +99,9 @@ const SignUp = async (req, res) => {
         else {
             category = await Category.find()
         }
-        if (existingAdmin?.data?.length > 0) {
-            return res.status(201).send({ success: false, message: "admin already exist" });
-        }
+        // if (existingAdmin?.data?.length > 0) {
+        //     return res.status(201).send({ success: false, message: "admin already exist" });
+        // }
         if (!user.category && category) {
             user.category = category?.[0]?.name
         } else if (!user.category && !category) {
@@ -111,7 +111,7 @@ const SignUp = async (req, res) => {
         if (newUser?._id) {
             const activationCode = Math.floor(100000 + Math.random() * 900000).toString();
             const code = new Verification({
-                email: newUser?.email,
+                phone: newUser?.phone,
                 code: activationCode
             })
             await code.save();
@@ -186,10 +186,10 @@ const SignUp = async (req, res) => {
 // login 
 const SignIn = async (req, res) => {
     try {
-        const { email, password } = req.body
+        const { phone, password } = req.body
         const [user, doctor] = await Promise.all([
-            User.findOne({ email: email }),
-            Doctor.findOne({ email: email })
+            User.findOne({ phone: phone }),
+            Doctor.findOne({ phone: phone })
         ])
         if (user && user?.block) {
             return res.status(400).send({ success: false, message: "your account has been blocked" });
@@ -210,7 +210,7 @@ const SignIn = async (req, res) => {
                 if ((user && !user?.verified) || (doctor && !doctor?.verified)) {
                     const activationCode = Math.floor(100000 + Math.random() * 900000).toString();
                     const code = new Verification({
-                        email: doctor?.email || user?.email,
+                        phone: doctor?.phone || user?.phone,
                         code: activationCode
                     })
                     const result = await sendMessage(`your verification code is ${activationCode}`, doctor?.phone || user?.phone)
@@ -466,14 +466,14 @@ const ChangePassword = async (req, res) => {
 // forget password send verification code
 const SendVerifyEmail = async (req, res) => {
     try {
-        const { email } = req.body
-        if (!email) {
-            return res.status(400).send({ success: false, message: 'invalid email' });
+        const { phone } = req.body
+        if (!phone) {
+            return res.status(400).send({ success: false, message: 'invalid Phone number' });
         }
         let user = {}
         const [doctor, normalUser] = await Promise.all([
-            Doctor.findOne({ email: email }),
-            User.findOne({ email: email })
+            Doctor.findOne({ phone: phone }),
+            User.findOne({ phone: phone })
         ])
         if (normalUser || doctor) {
             if (normalUser) {
@@ -481,12 +481,12 @@ const SendVerifyEmail = async (req, res) => {
             } else {
                 user = doctor
             }
-            if (!user?.email) {
-                return res.status(400).send({ success: false, message: 'email not found' });
+            if (!user?.phone) {
+                return res.status(400).send({ success: false, message: 'User not found' });
             }
             const activationCode = Math.floor(100000 + Math.random() * 900000).toString();
             const code = new Verification({
-                email: email,
+                phone: phone,
                 code: activationCode
             })
 
@@ -536,7 +536,7 @@ const SendVerifyEmail = async (req, res) => {
             return res.status(200).send({ success: true, message: `verification code has been sent to ${user?.phone}`, });
         }
         else {
-            return res.status(400).send({ success: false, message: 'email not found' });
+            return res.status(400).send({ success: false, message: 'User not found' });
         }
     } catch (error) {
         return res.status(500).send({ success: false, message: error?.message || 'Internal server error', ...error });
@@ -545,12 +545,12 @@ const SendVerifyEmail = async (req, res) => {
 
 //verify code
 const VerifyCode = async (req, res) => {
-    const { code, email } = req.body;
+    const { code, phone } = req.body;
     try {
         const [verify, user, doctor] = await Promise.all([
-            Verification.findOne({ email: email, code: code }),
-            User.findOne({ email: email }),
-            Doctor.findOne({ email: email })
+            Verification.findOne({ phone: phone, code: code }),
+            User.findOne({ phone: phone }),
+            Doctor.findOne({ phone: phone })
         ])
 
         if (verify?._id) {
@@ -561,13 +561,13 @@ const VerifyCode = async (req, res) => {
                 type = 'DOCTOR'
             }
             if (type === 'DOCTOR') {
-                await Doctor.updateOne({ email: email }, {
+                await Doctor.updateOne({ phone: phone }, {
                     $set: {
                         verified: true
                     }
                 })
             } else {
-                await User.updateOne({ email: email }, {
+                await User.updateOne({ phone: phone }, {
                     $set: {
                         verified: true
                     }
@@ -586,8 +586,8 @@ const VerifyCode = async (req, res) => {
                 id: user?._id || doctor?._id
             }
             const token = await jwt.sign(userData, ACCESS_TOKEN_SECRET, { expiresIn: 3600000000 });
-            const accessToken = await jwt.sign({ code, email }, ACCESS_TOKEN_SECRET, { expiresIn: 600 });
-            Verification.deleteOne({ email: email, code: code })
+            const accessToken = await jwt.sign({ code, phone }, ACCESS_TOKEN_SECRET, { expiresIn: 600 });
+            Verification.deleteOne({ phone: phone, code: code })
             res.status(200).send({ success: true, accessToken, token, message: `${type || 'user'} verified successfully` })
         } else {
             res.status(404).send({ success: false, message: "verification code doesn't match" });
@@ -601,7 +601,7 @@ const VerifyCode = async (req, res) => {
 const ResetPassword = async (req, res) => {
     try {
         const requestedUser = req?.user
-        const verify = await Verification.findOne({ email: requestedUser?.email, code: requestedUser?.code })
+        const verify = await Verification.findOne({ phone: requestedUser?.phone, code: requestedUser?.code })
         if (verify?._id) {
             const { password, confirm_password, type } = req.body
             if (password !== confirm_password) {
@@ -610,12 +610,12 @@ const ResetPassword = async (req, res) => {
             const hash_pass = await HashPassword(password)
             //console.log(hash_pass)
             await Promise.all([
-                Doctor.updateOne({ email: verify?.email }, {
+                Doctor.updateOne({ phone: verify?.phone }, {
                     $set: {
                         password: hash_pass
                     }
                 }),
-                User.updateOne({ email: verify?.email }, {
+                User.updateOne({ phone: verify?.phone }, {
                     $set: {
                         password: hash_pass
                     }
@@ -658,7 +658,7 @@ const ResetPassword = async (req, res) => {
             //     `,
             // });
 
-            await Verification.deleteOne({ email: requestedUser?.email, code: requestedUser?.code })
+            await Verification.deleteOne({ phone: requestedUser?.phone, code: requestedUser?.code })
             return res.status(200).send({ success: true, message: 'password updated successfully' });
         } else {
             res.status(401).send({ success: false, message: "verification code doesn't match" });
@@ -708,24 +708,24 @@ const createDoctor = async (req, res) => {
             try {
                 const { available_days, available_for, services, fcm, ...otherInfo } = req.body
                 // console.log(JSON.parse(services))
-                const email = otherInfo?.email
+                const phone = otherInfo?.phone
                 const [existingDoctor, user] = await Promise.all([
-                    Doctor.findOne({ email: email, verified: false }),
-                    User.findOne({ email: email }),
+                    Doctor.findOne({ phone: phone, verified: false }),
+                    User.findOne({ phone: phone }),
                 ])
                 if (user) {
-                    return res.status(403).send({ success: false, message: "there's a user with this email  you can't create doctor with this email" })
+                    return res.status(403).send({ success: false, message: "there's a user with this phone  you can't create doctor with this phone" })
                 }
                 if (existingDoctor) {
                     const activationCode = Math.floor(100000 + Math.random() * 900000).toString();
                     const code = new Verification({
-                        email: existingDoctor?.email,
+                        phone: existingDoctor?.phone,
                         code: activationCode
                     })
-                    // const msgResult = await sendMessage(`your verification code is ${code?.code}`, existingDoctor?.phone)
-                    // if (msgResult?.invalid) {
-                    //     return res.status(400).send({ success: false, message: `${existingDoctor?.phone} is not a valid number or missing country code` })
-                    // }
+                    const msgResult = await sendMessage(`your verification code is ${code?.code}`, existingDoctor?.phone)
+                    if (msgResult?.invalid) {
+                        return res.status(400).send({ success: false, message: `${existingDoctor?.phone} is not a valid number or missing country code` })
+                    }
                     await code.save();
                     // SendEmail({
                     //     sender: 'Medical',
@@ -827,7 +827,7 @@ const createDoctor = async (req, res) => {
 
                     const activationCode = Math.floor(100000 + Math.random() * 900000).toString();
                     const code = new Verification({
-                        email: newDoctor?.email,
+                        phone: newDoctor?.phone,
                         code: activationCode
                     })
                     const msgResult = await sendMessage(`your verification code is ${code?.code}`, newDoctor?.phone)
