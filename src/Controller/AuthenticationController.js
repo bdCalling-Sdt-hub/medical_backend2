@@ -99,9 +99,9 @@ const SignUp = async (req, res) => {
         else {
             category = await Category.find()
         }
-        // if (existingAdmin?.data?.length > 0) {
-        //     return res.status(201).send({ success: false, message: "admin already exist" });
-        // }
+        if (existingAdmin?.data?.length > 0) {
+            return res.status(201).send({ success: false, message: "admin already exist" });
+        }
         if (!user.category && category) {
             user.category = category?.[0]?.name
         } else if (!user.category && !category) {
