@@ -24,6 +24,7 @@ const callHistoryRoutes = require("./src/routes/CallHistoryRoutes");
 const checkPastPendingAppointments = require("./src/utils/ChekPastPandingAppoinment");
 const FCMtokenRoutes = require("./src/routes/FCMtokenRoutes");
 const sendMessage = require("./src/utils/SendMessage");
+const SeadAdmin = require("./src/Seader/AdminSeader");
 // const PhoneInfo = require("./src/utils/SendMessage");
 // const test = require("./src/utils/SendMessage");
 applyMiddleware(app);
@@ -94,6 +95,7 @@ app.use(globalErrorHandler);
 const main = async () => {
   await connectDB()
   server.listen(port, () => {
+    SeadAdmin()
     process.on("unhandledRejection", (error) => {
       // logger.error("Unhandled Rejection:", error);
       // server.close(() => process.exit(1));
