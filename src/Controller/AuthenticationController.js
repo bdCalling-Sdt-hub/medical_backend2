@@ -162,7 +162,7 @@ const SignUp = async (req, res) => {
             // });
 
             return res.status(200).send({
-                success: true, data: savedUser, message: 'user created successfully and verification code sent to your email',
+                success: true, data: savedUser, message: 'user created successfully and verification code sent to your phone',
             });
         } else {
             res.status(201).send({ success: false, message: 'something went wrong' });
@@ -768,7 +768,7 @@ const createDoctor = async (req, res) => {
                     //     `,
                     // });
 
-                    return res.status(201).send({ success: true, message: 'doctor created successfully a verification code sent to your email', data: existingDoctor, });
+                    return res.status(201).send({ success: true, message: 'doctor created successfully a verification code sent to your phone', data: existingDoctor, });
                 }
                 const available_days_purse = JSON.parse(available_days)
                 const available_for_purse = JSON.parse(available_for)
@@ -877,7 +877,7 @@ const createDoctor = async (req, res) => {
                     //     `,
                     // });
 
-                    res.status(201).send({ success: true, message: 'doctor created successfully a verification code sent to your email', data: newDoctor });
+                    res.status(201).send({ success: true, message: 'doctor created successfully a verification code sent to your phone', data: newDoctor });
                 } catch (error) {
                     let duplicateKeys = '';
                     if (error?.keyValue) {
