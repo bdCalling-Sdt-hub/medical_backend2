@@ -964,10 +964,10 @@ const updateDoctor = async (req, res) => {
                 }
                 console.log(availableDaysCheck)
                 const filesToDelete = [];
-                if (doctor.img) {
+                if (doctor.img && img) {
                     filesToDelete.push(doctor.img);
                 }
-                if (doctor.license) {
+                if (doctor.license && license) {
                     filesToDelete.push(doctor.license);
                 }
                 if (services) {
