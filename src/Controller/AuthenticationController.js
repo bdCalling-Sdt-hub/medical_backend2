@@ -491,8 +491,9 @@ const SendVerifyEmail = async (req, res) => {
             })
 
             const msgResult = await sendMessage(`your verification code is ${code?.code}`, user?.phone)
+
             if (msgResult?.invalid) {
-                return res.status(400).send({ success: false, message: `${existingUsers?.phone} is not a valid number or missing country code` })
+                return res.status(400).send({ success: false, message: `${user?.phone} is not a valid number or missing country code` })
             }
             // SendEmail({
             //     sender: 'Medical',
